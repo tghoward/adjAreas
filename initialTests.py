@@ -5,8 +5,9 @@ Created on Fri Oct 21 14:42:24 2016
 @author: NYNHP_admin
 """
 
-import arcpy as AP
+import arcpy
 from arcpy import env as E
+import arcpy.sa as SA
 
 E.workspace = "D:/EPA_AdjArea/CalcAdjArea"
 E.overwriteOutput=True
@@ -20,5 +21,30 @@ inPoints = pointLoc + "/" + pointLayer
 outBuff = pointLoc + "/" + "SitePtsBuff1km"
 buffDist = "1000"
 
-AP.Buffer_analysis(inPoints, outBuff, buffDist, "FULL","ROUND","NONE")
+arcpy.Buffer_analysis(inPoints, outBuff, buffDist, "FULL","ROUND","NONE")
 
+#%%
+
+need to use MakeFeatureLayer_management
+and then Select layer by attribute or something 
+
+inRas = "D:/EPA_AdjArea/CalcAdjArea/tauDEMtests/flowdir.tif"
+outPath = "D:\\EPA_AdjArea\\CalcAdjArea\\output"
+
+cursor = arcpy.SearchCursor(outBuff)
+for row in cursor:
+    polName = row.getValue("site_ID")
+    print(polName)
+    outExtractByMask = SA.ExtractByMask(inRas, row)
+    outname = outPath + "\\" + polName
+    outExtractByMask.save(outname)
+    
+    
+    
+    
+#%%
+    
+    
+#row = cursor.next()
+#while row:
+    
