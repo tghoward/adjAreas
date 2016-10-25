@@ -26,6 +26,8 @@ ENV.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
 
+baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
+
 #%%
 # start with the sample points, buffer them
 pointLoc = "D:/EPA_AdjArea/CalcAdjArea/NYW14_testPts.gdb"
@@ -46,7 +48,13 @@ for row in cursor:
     siteval = row.getValue("site_ID")
     idList.append((idval,siteval))
 
-del cursor, row    
+siteList = [x[1] for x in idList]
+if len(siteList) > len(set(siteList)):
+    print "site_ID VALUES ARE NOT UNIQUE!!"
+else:
+    print "values in site_ID column are unique"
+    
+del cursor, row
     
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
@@ -54,7 +62,7 @@ del cursor, row
 lyr = arcpy.mapping.Layer(buffedPts)
     
 inRas = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
-outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_1_DEM"
+outPath = baseOutPath + "/disks_1_DEM"
 
 if not os.path.exists(outPath):
     os.makedirs(outPath)
@@ -77,11 +85,12 @@ del lyr, selStmt
 #%%
 # complete Pit Remove for each disk
 
-inPath = outPath
+inPath = baseOutPath + "/disks_1_DEM"
+outPath = baseOutPath + "/disks_2_pitsRemoved"
+
 ENV.workspace = inPath
 RasList = arcpy.ListRasters("*","TIF")
 
-outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_2_pitsRemoved"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
     
@@ -93,15 +102,15 @@ for ras in RasList:
 #%%    
 # calculate flow direction (infinity) and slope for each disk
 
-inPath = outPath
+inPath = baseOutPath + "/disks_2_pitsRemoved"
+outPath = baseOutPath + "/disks_3_flowdir"
+outPath2 = baseOutPath + "/disks_3b_slope"
+
 ENV.workspace = inPath
 RasList = arcpy.ListRasters("*","TIF")
 
-outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_3_flowdir"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
-
-outPath2 = "D:/EPA_AdjArea/CalcAdjArea/output/disks_3b_slope"
 if not os.path.exists(outPath2):
     os.makedirs(outPath2)
     
@@ -113,15 +122,15 @@ for ras in RasList:
 
 #%%
 # calculate contributing area for each disk and point
-inPath = outPath
+inPath = baseOutPath + "/disks_3_flowdir"
+outPath = baseOutPath + "/disks_4b_contribArea"
+outShp = baseOutPath + "/disks_4a_pointShps"
+
 ENV.workspace = inPath
 RasList = arcpy.ListRasters("*","TIF")
 
-outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4b_contribArea"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
-    
-outShp = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4a_pointShps"
 if not os.path.exists(outShp):
     os.makedirs(outShp)
 
