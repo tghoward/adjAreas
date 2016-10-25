@@ -7,7 +7,7 @@ Created on Fri Oct 21 14:42:24 2016
 This script begins with, as inputs:
     sampled wetland points
     10 m dem
-It then extracts an area around each point and, through many steps, estimates the 
+It then extracts an area around each point and, through many steps, estimates the
 upland area contributing to that point (or a region around the point)
 
 Assumptions:
@@ -22,7 +22,7 @@ from arcpy import env as ENV
 import arcpy.sa as SA
 
 ENV.workspace = "D:/EPA_AdjArea/CalcAdjArea"
-ENV.overwriteOutput=True
+ENV.overwriteOutput = True
 
 arcpy.CheckOutExtension("Spatial")
 
@@ -45,7 +45,8 @@ cursor = arcpy.SearchCursor(buffedPts)
 idList = []
 for row in cursor:
     idval = row.getValue("OBJECTID")
-    idList.append(idval)
+    siteval = row.getValue("site_ID")
+    idList.append((idval,siteval))
     
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
@@ -58,11 +59,11 @@ if not os.path.exists(outPath):
     os.makedirs(outPath)
 
 for i in idList:
-    selStmt = "OBJECTID = " + str(i)
+    selStmt = "OBJECTID = " + str(i[0])  #first value of tuple is objectid
     arcpy.SelectLayerByAttribute_management("lyr","NEW_SELECTION", selStmt)
-    for row in arcpy.SearchCursor("lyr"):
-        print row.site_ID
-        outname = outPath + "\\" + row.site_ID + ".tif"
+    siteID = i[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
+    outname = outPath + "\\" + siteID + ".tif"
+
     outExtractByMask = SA.ExtractByMask(inRas, "lyr")
     outExtractByMask.save(outname)
 
