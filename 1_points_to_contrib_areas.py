@@ -117,32 +117,23 @@ outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4_contribArea"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
 
-# get a list of records from the point layer
+lyr = arcpy.mapping.Layer(inPoints)    
 cursor = arcpy.SearchCursor(inPoints)
-ptSites = []
+
 for row in cursor:
-    siteID = row.getValue("site_ID")
-    ptSites.append(siteID)    
-ptSites.sort()
-
-for site in ptSites:
-    for ras in RasList: 
+    site = row.getValue("site_ID")
+    #print site
+    selStmt = "site_ID = '" + site + "'"
+    arcpy.SelectLayerByAttribute_management(lyr,"NEW_SELECTION", selStmt)            
+    for ras in RasList:
         rname = ras[:-7]
-        if site == rname:
-            #do stuff here
-            return
-
-            
-            
-flowDirGrid = "D:\\EPA_AdjArea\\CalcAdjArea\\output\\nyw14-007"
-OutContribAreaGrid = "D:\\EPA_AdjArea\\CalcAdjArea\\output\\nyw14-007-contrib"
-
-
-
-
-arcpy.AreaDinf_TauDEM(flowDirGrid, inPointFC, "", "false", 8, OutContribAreaGrid)
-    
-    
+        #print rname
+        if rname == site:
+            #print "...match"
+            flowDirGrid = inPath + "/" + ras
+            outContribArea = outPath + "/" + rname + "_ca.tif"
+            arcpy.AreaDinf_TauDEM(flowDirGrid, lyr, "", "false", 8, outContribArea)
+ 
     
 #%%
     
