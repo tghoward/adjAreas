@@ -11,7 +11,7 @@ It then extracts an area around each point and, through many steps, estimates th
 upland area contributing to that point (or a region around the point)
 
 Assumptions:
-    input point layer has a field named "site_ID"
+    input point layer has a field named "site_ID" and these are unique
 """
 
 #%%
@@ -21,11 +21,9 @@ import arcpy
 from arcpy import env as ENV
 import arcpy.sa as SA
 
-ENV.workspace = "D:/EPA_AdjArea/CalcAdjArea"
+ENV.workspace = "D:/EPA_AdjArea/CalcAdjArea/output/_wrkspace"
 ENV.overwriteOutput = True
-
 arcpy.CheckOutExtension("Spatial")
-
 arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
 
 #%%
@@ -40,7 +38,7 @@ buffDist = "1500"
 arcpy.Buffer_analysis(inPoints, buffedPts, buffDist, "FULL","ROUND","NONE")
 
 #%%
-# get a list of ObjectIDs for all records, just to be sure for the next step
+# get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
 cursor = arcpy.SearchCursor(buffedPts)
 idList = []
 for row in cursor:
@@ -50,26 +48,28 @@ for row in cursor:
     
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
-arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
-
+#arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
+lyr = arcpy.mapping.Layer(buffedPts)
+    
 inRas = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
 outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_1_DEM"
 
 if not os.path.exists(outPath):
     os.makedirs(outPath)
 
-for i in idList:
-    selStmt = "OBJECTID = " + str(i[0])  #first value of tuple is objectid
-    arcpy.SelectLayerByAttribute_management("lyr","NEW_SELECTION", selStmt)
-    siteID = i[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
+for tup in idList:
+    selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
+    arcpy.SelectLayerByAttribute_management(lyr,"NEW_SELECTION", selStmt)
+    siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
     outname = outPath + "\\" + siteID + ".tif"
-
-    outExtractByMask = SA.ExtractByMask(inRas, "lyr")
+    extent = lyr.getSelectedExtent()
+    ENV.extent = str(extent.XMin) + " " + str(extent.YMin) + " " + str(extent.XMax) + " " + str(extent.YMax)
+    print "clipping " + siteID
+    outExtractByMask = SA.ExtractByMask(inRas, lyr)
     outExtractByMask.save(outname)
 
-## TODO: reduce the size of each raster here??  Right now they have the full extent of original?
+arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")    
     
-
 #%%
 # complete Pit Remove for each disk
 
