@@ -45,6 +45,8 @@ for row in cursor:
     idval = row.getValue("OBJECTID")
     siteval = row.getValue("site_ID")
     idList.append((idval,siteval))
+
+del cursor, row    
     
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
@@ -68,7 +70,9 @@ for tup in idList:
     outExtractByMask = SA.ExtractByMask(inRas, lyr)
     outExtractByMask.save(outname)
 
-arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")    
+arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")
+
+del lyr, selStmt
     
 #%%
 # complete Pit Remove for each disk
@@ -113,18 +117,44 @@ inPath = outPath
 ENV.workspace = inPath
 RasList = arcpy.ListRasters("*","TIF")
 
-outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4_contribArea"
+outPath = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4b_contribArea"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
+    
+outShp = "D:/EPA_AdjArea/CalcAdjArea/output/disks_4a_pointShps"
+if not os.path.exists(outShp):
+    os.makedirs(outShp)
 
-lyr = arcpy.mapping.Layer(inPoints)    
 cursor = arcpy.SearchCursor(inPoints)
-
+siteList = []
 for row in cursor:
     site = row.getValue("site_ID")
-    #print site
+    siteList.append(site)
+
+#lyr = arcpy.mapping.Layer(inPoints)
+
+pointLoc = "D:/EPA_AdjArea/CalcAdjArea/NYW14_testPts.gdb"
+pointLayer = "SitePoints"
+inPoints = pointLoc + "/" + pointLayer
+
+arcpy.MakeFeatureLayer_management(inPoints, "lyr2")
+for tup in idList:
     selStmt = "site_ID = '" + site + "'"
-    arcpy.SelectLayerByAttribute_management(lyr,"NEW_SELECTION", selStmt)            
+    selStmt = "OBJECTID = " + str(tup[0])
+    site = tup[1]
+    arcpy.SelectLayerByAttribute_management("lyr2","NEW_SELECTION", selStmt)
+    outFileN = outShp + "/" + site + "_pt.shp"
+    outFileN = outFileN.replace("-","_") #illegal character in shapefile name
+    arcpy.CopyFeatures_management("lyr2", outFileN)
+
+    
+    
+    
+ENV.workspace = outShp
+shpList = arcpy.ListFeatureClasses()    
+
+for shp in shpList:
+    site = shp[:-7].replace("_","-")
     for ras in RasList:
         rname = ras[:-7]
         #print rname
@@ -132,10 +162,13 @@ for row in cursor:
             #print "...match"
             flowDirGrid = inPath + "/" + ras
             outContribArea = outPath + "/" + rname + "_ca.tif"
-            arcpy.AreaDinf_TauDEM(flowDirGrid, lyr, "", "false", 8, outContribArea)
+            inShp = outShp + "/" + shp
+            arcpy.AreaDinf_TauDEM(flowDirGrid, inShp, "", "false", 8, outContribArea)
  
-    
+
+del lyr, cursor, row     
+            
 #%%
     
-    
+arcpy.GetCount_management('lyr2')
     
