@@ -5,13 +5,15 @@ Created on Fri Oct 21 14:42:24 2016
 @author: Tim Howard
 
 This script begins with, as inputs:
-    sampled wetland points
+    sampled wetland points and buffered polygons (see prev script)
     10 m dem
 It then extracts an area around each point and, through many steps, estimates the
 upland area contributing to that point (or a region around the point)
 
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
+    
+If running straight from previous script, restart the kernal with ctrl+. in console.    
 """
 
 #%%
@@ -29,22 +31,10 @@ arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauD
 baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
-# start with the sample points, buffer them
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-pointLayer = "SitePoints.shp"
-inPoints = pointLoc + "/" + pointLayer
-
-buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km.shp"
-buffDist = "1500"
-# do the buffer, don't merge the resulting polys
-arcpy.Buffer_analysis(inPoints, buffedPts, buffDist, "FULL","ROUND","NONE")
-
-
-#SPLIT INTO TWO, RIGHT HERE, TO AVOID PROBLEM OF BUFFER ANALYSIS MUCKING UP THE POINTS LAYER!!
-# SPENT AN ENTIRE DAY ON THIS AND NARROWED IT DOWN TO THIS CALL. 
-
-#%%
 # get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
+pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
+buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km.shp"
+
 cursor = arcpy.SearchCursor(buffedPts)
 idList = []
 for row in cursor:
@@ -125,52 +115,3 @@ for ras in RasList:
     outRas2 = outPath2 + "/" + lyrName + "_sl.tif"
     arcpy.DinfFlowDir_TauDEM(ras, 8, outRas, outRas2)
 
-#%%
-# calculate contributing area for each disk and point
-inPath = baseOutPath + "/disks_3_flowdir"
-outPath = baseOutPath + "/disks_4b_contribArea"
-outShp = baseOutPath + "/disks_4a_pointShps"
-
-ENV.workspace = inPath
-RasList = arcpy.ListRasters("*","TIF")
-
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
-if not os.path.exists(outShp):
-    os.makedirs(outShp)
-
-arcpy.MakeFeatureLayer_management(inPoints, "lyr")
-for site in idList:
-    selStmt = "site_ID = '" + site + "'"
-    arcpy.SelectLayerByAttribute_management("lyr","NEW_SELECTION", selStmt)
-    outFileN = outShp + "/" + site + "_pt.shp"
-    outFileN = outFileN.replace("-","_") #illegal character in shapefile name
-    arcpy.CopyFeatures_management("lyr", outFileN)
-    
-#outS = site + "_pt.shp"
-#outS = outS.replace("-","_")
-#arcpy.FeatureClassToFeatureClass_conversion(inPoints, outShp, outS, selStmt)
-    
-    
-ENV.workspace = outShp
-shpList = arcpy.ListFeatureClasses()    
-
-for shp in shpList:
-    site = shp[:-7].replace("_","-")
-    for ras in RasList:
-        rname = ras[:-7]
-        #print rname
-        if rname == site:
-            #print "...match"
-            flowDirGrid = inPath + "/" + ras
-            outContribArea = outPath + "/" + rname + "_ca.tif"
-            inShp = outShp + "/" + shp
-            arcpy.AreaDinf_TauDEM(flowDirGrid, inShp, "", "false", 8, outContribArea)
- 
-
-del cursor, row   
-            
-#%%
-    
-arcpy.GetCount_management('lyr')
-    
