@@ -52,7 +52,7 @@ del cursor, row
 
 #%%
 # split points into separate shapefiles as tauDEM can't seem to use selections
-OUT_SHP = BASE_OUT_PATH + "/pts_1_pointShps"
+OUT_SHP = BASE_OUT_PATH + "/e_pts_pointShps"
 
 if not os.path.exists(OUT_SHP):
     os.makedirs(OUT_SHP)
@@ -71,8 +71,8 @@ arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
 # expand the reach of each point.
 # buffer the points by 50 m
 
-IN_PATH = BASE_OUT_PATH + "/pts_1_pointShps"
-OUT_PATH = BASE_OUT_PATH + "/pts_2_buff_pols"
+IN_PATH = BASE_OUT_PATH + "/e_pts_pointShps"
+OUT_PATH = BASE_OUT_PATH + "/f_pts_buff_pols"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
@@ -92,8 +92,8 @@ for shp in shpList:
 # to make points for each cell within each polygon
 
 IN_CONST_RAS = "D:/EPA_AdjArea/CalcAdjArea/inputs/constantRaster.tif"
-IN_PATH = BASE_OUT_PATH + "/pts_2_buff_pols"
-OUT_PATH = BASE_OUT_PATH + "/disks_4_buffPts"
+IN_PATH = BASE_OUT_PATH + "/f_pts_buff_pols"
+OUT_PATH = BASE_OUT_PATH + "/g_disks_buffPts"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
@@ -113,8 +113,8 @@ for shp in shpList:
 
 arcpy.ClearEnvironment("extent")
 
-IN_PATH = BASE_OUT_PATH + "/disks_4_buffPts"
-OUT_PATH = BASE_OUT_PATH + "/pts_3_pts_in_buff"
+IN_PATH = BASE_OUT_PATH + "/g_disks_buffPts"
+OUT_PATH = BASE_OUT_PATH + "/h_pts_in_buff"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
@@ -130,9 +130,9 @@ for ras in rasList:
 
 #%%
 # calculate contributing area for each disk and point
-IN_PATH = BASE_OUT_PATH + "/disks_3_flowdir"
-OUT_PATH = BASE_OUT_PATH + "/disks_4b_contribArea"
-IN_SHP = BASE_OUT_PATH + "/pts_3_pts_in_buff"
+IN_PATH = BASE_OUT_PATH + "/c_disks_flowdir"
+OUT_PATH = BASE_OUT_PATH + "/i_disks_contribArea"
+IN_SHP = BASE_OUT_PATH + "/h_pts_in_buff"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)

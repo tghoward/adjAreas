@@ -56,7 +56,7 @@ del cursor, row
 lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
 IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
-OUT_PATH = BASE_OUT_PATH + "/disks_1_DEM"
+OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
@@ -80,8 +80,8 @@ del lyr, selStmt
 #%%
 # complete Pit Remove for each disk
 
-IN_PATH = BASE_OUT_PATH + "/disks_1_DEM"
-OUT_PATH = BASE_OUT_PATH + "/disks_2_pitsRemoved"
+IN_PATH = BASE_OUT_PATH + "/a_disks_DEM"
+OUT_PATH = BASE_OUT_PATH + "/b_disks_pitsRemoved"
 
 ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
@@ -97,9 +97,9 @@ for ras in RasList:
 #%%
 # calculate flow direction (infinity) and slope for each disk
 
-IN_PATH = BASE_OUT_PATH + "/disks_2_pitsRemoved"
-OUT_PATH = BASE_OUT_PATH + "/disks_3_flowdir"
-OUT_PATH2 = BASE_OUT_PATH + "/disks_3b_slope"
+IN_PATH = BASE_OUT_PATH + "/b_disks_pitsRemoved"
+OUT_PATH = BASE_OUT_PATH + "/c_disks_flowdir"
+OUT_PATH2 = BASE_OUT_PATH + "/d_disks_slope"
 
 ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
