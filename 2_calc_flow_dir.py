@@ -12,8 +12,8 @@ upland area contributing to that point (or a region around the point)
 
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
-    
-If running straight from previous script, restart the kernal with ctrl+. in console.    
+
+If running straight from previous script, restart the kernal with ctrl+. in console.
 """
 
 #%%
@@ -47,14 +47,14 @@ if len(idList) > len(set(idList)):
     print "site_ID VALUES ARE NOT UNIQUE!!"
 else:
     print "values in site_ID column are unique"
-    
+
 del cursor, row
-    
+
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
 #arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
 lyr = arcpy.mapping.Layer(buffedPts)
-    
+
 inRas = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
 outPath = baseOutPath + "/disks_1_DEM"
 
@@ -64,7 +64,7 @@ if not os.path.exists(outPath):
 for site in idList:
     #selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
     selStmt = "site_ID = '" + site + "'"
-    arcpy.SelectLayerByAttribute_management(lyr,"NEW_SELECTION", selStmt)
+    arcpy.SelectLayerByAttribute_management(lyr, "NEW_SELECTION", selStmt)
     #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
     outname = outPath + "\\" + site + ".tif"
     extent = lyr.getSelectedExtent()
@@ -76,7 +76,7 @@ for site in idList:
 arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")
 
 del lyr, selStmt
-    
+
 #%%
 # complete Pit Remove for each disk
 
@@ -84,17 +84,17 @@ inPath = baseOutPath + "/disks_1_DEM"
 outPath = baseOutPath + "/disks_2_pitsRemoved"
 
 ENV.workspace = inPath
-RasList = arcpy.ListRasters("*","TIF")
+RasList = arcpy.ListRasters("*", "TIF")
 
 if not os.path.exists(outPath):
     os.makedirs(outPath)
-    
+
 for ras in RasList:
     lyrName = ras[:-4]
     outRas = outPath + "/" + lyrName + "_pr.tif"
     arcpy.PitRemove_TauDEM(ras, "", "", 8, outRas)
 
-#%%    
+#%%
 # calculate flow direction (infinity) and slope for each disk
 
 inPath = baseOutPath + "/disks_2_pitsRemoved"
@@ -102,14 +102,14 @@ outPath = baseOutPath + "/disks_3_flowdir"
 outPath2 = baseOutPath + "/disks_3b_slope"
 
 ENV.workspace = inPath
-RasList = arcpy.ListRasters("*","TIF")
+RasList = arcpy.ListRasters("*", "TIF")
 
 if not os.path.exists(outPath):
     os.makedirs(outPath)
 if not os.path.exists(outPath2):
     os.makedirs(outPath2)
-    
-for ras in RasList:   
+
+for ras in RasList:
     lyrName = ras[:-7]
     outRas = outPath + "/" + lyrName + "_fd.tif"
     outRas2 = outPath2 + "/" + lyrName + "_sl.tif"
