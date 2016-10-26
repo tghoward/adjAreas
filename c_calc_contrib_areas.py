@@ -27,15 +27,15 @@ ENV.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
 
-baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
+BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
 # get a list of siteIDs for all records; make sure they are unique
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-pointLayer = "SitePoints_2.shp"
-inPoints = pointLoc + "/" + pointLayer
+POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
+POINT_LAYER = "SitePoints_2.shp"
+IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
-cursor = arcpy.SearchCursor(inPoints)
+cursor = arcpy.SearchCursor(IN_POINTS)
 idList = []
 for row in cursor:
     siteval = row.getValue("site_ID")
@@ -52,17 +52,17 @@ del cursor, row
 
 #%%
 # split points into separate shapefiles as tauDEM can't seem to use selections
-outShp = baseOutPath + "/pts_1_pointShps"
+OUT_SHP = BASE_OUT_PATH + "/pts_1_pointShps"
 
-if not os.path.exists(outShp):
-    os.makedirs(outShp)
+if not os.path.exists(OUT_SHP):
+    os.makedirs(OUT_SHP)
 
-arcpy.MakeFeatureLayer_management(inPoints, "lyr2")
+arcpy.MakeFeatureLayer_management(IN_POINTS, "lyr2")
 
 for site in idList:
     selStmt = "site_ID = '" + site + "'"
     arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
-    outFileN = outShp + "/" + site + "_pt.shp"
+    outFileN = OUT_SHP + "/" + site + "_pt.shp"
     outFileN = outFileN.replace("-", "_") #illegal character in shapefile name
     arcpy.CopyFeatures_management("lyr2", outFileN)
 
@@ -71,19 +71,19 @@ arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
 # expand the reach of each point.
 # buffer the points by 50 m
 
-inPath = baseOutPath + "/pts_1_pointShps"
-outPath = baseOutPath + "/pts_2_buff_pols"
+IN_PATH = BASE_OUT_PATH + "/pts_1_pointShps"
+OUT_PATH = BASE_OUT_PATH + "/pts_2_buff_pols"
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
     site = shp[:-7]
     buffDist = "50"
-    outShp = outPath + "/" + site + "_bu.shp"
+    outShp = OUT_PATH + "/" + site + "_bu.shp"
     arcpy.Buffer_analysis(shp, outShp, buffDist, "FULL", "ROUND", "NONE")
 
 
@@ -91,56 +91,56 @@ for shp in shpList:
 # use a statewide constant raster (all values of 1)
 # to make points for each cell within each polygon
 
-inConstRas = "D:/EPA_AdjArea/CalcAdjArea/inputs/constantRaster.tif"
-inPath = baseOutPath + "/pts_2_buff_pols"
-outPath = baseOutPath + "/disks_4_buffPts"
+IN_CONST_RAS = "D:/EPA_AdjArea/CalcAdjArea/inputs/constantRaster.tif"
+IN_PATH = BASE_OUT_PATH + "/pts_2_buff_pols"
+OUT_PATH = BASE_OUT_PATH + "/disks_4_buffPts"
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 
-ENV.cellSize = inConstRas
-ENV.snapRaster = inConstRas
+ENV.cellSize = IN_CONST_RAS
+ENV.snapRaster = IN_CONST_RAS
 
 for shp in shpList:
     site = shp[:-7]
-    shpFull = inPath + "/" + shp
+    shpFull = IN_PATH + "/" + shp
     ENV.extent = shpFull
-    outRas = outPath + "/" + site + "_bp.tif"
+    outRas = OUT_PATH + "/" + site + "_bp.tif"
     arcpy.PolygonToRaster_conversion(shpFull, "FID", outRas, "CELL_CENTER", "", 10)
 
 arcpy.ClearEnvironment("extent")
 
-inPath = baseOutPath + "/disks_4_buffPts"
-outPath = baseOutPath + "/pts_3_pts_in_buff"
+IN_PATH = BASE_OUT_PATH + "/disks_4_buffPts"
+OUT_PATH = BASE_OUT_PATH + "/pts_3_pts_in_buff"
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 rasList = arcpy.ListRasters("*", "TIF")
 
 for ras in rasList:
     site = ras[:-7]
-    rasFull = inPath + "/" + ras
-    outShp = outPath + "/" + site + "_bp.shp"
+    rasFull = IN_PATH + "/" + ras
+    outShp = OUT_PATH + "/" + site + "_bp.shp"
     arcpy.RasterToPoint_conversion(rasFull, outShp, "VALUE")
 
 #%%
 # calculate contributing area for each disk and point
-inPath = baseOutPath + "/disks_3_flowdir"
-outPath = baseOutPath + "/disks_4b_contribArea"
-inShp = baseOutPath + "/pts_3_pts_in_buff"
+IN_PATH = BASE_OUT_PATH + "/disks_3_flowdir"
+OUT_PATH = BASE_OUT_PATH + "/disks_4b_contribArea"
+IN_SHP = BASE_OUT_PATH + "/pts_3_pts_in_buff"
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
 
-ENV.workspace = inShp
+ENV.workspace = IN_SHP
 shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
@@ -150,9 +150,9 @@ for shp in shpList:
         #print rname
         if rname == site:
             #print "...match"
-            flowDirGrid = inPath + "/" + ras
-            outContribArea = outPath + "/" + rname + "_ca.tif"
-            inShap = inShp + "/" + shp
+            flowDirGrid = IN_PATH + "/" + ras
+            outContribArea = OUT_PATH + "/" + rname + "_ca.tif"
+            inShap = IN_SHP + "/" + shp
             arcpy.AreaDinf_TauDEM(flowDirGrid, inShap, "", "false", 8, outContribArea)
 #%%
 
