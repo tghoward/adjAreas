@@ -28,14 +28,14 @@ ENV.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
 
-baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
+BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
 # get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km.shp"
+POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
+BUFFERED_PTS = POINT_LOC + "/" + "SitePtsBuff1pt5km.shp"
 
-cursor = arcpy.SearchCursor(buffedPts)
+cursor = arcpy.SearchCursor(BUFFERED_PTS)
 idList = []
 for row in cursor:
     siteval = row.getValue("site_ID")
@@ -53,24 +53,24 @@ del cursor, row
 #%%
 # extract a separate DEM raster for each buffered point. Call them 'disks'
 #arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
-lyr = arcpy.mapping.Layer(buffedPts)
+lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
-inRas = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
-outPath = baseOutPath + "/disks_1_DEM"
+IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
+OUT_PATH = BASE_OUT_PATH + "/disks_1_DEM"
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
 for site in idList:
     #selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
     selStmt = "site_ID = '" + site + "'"
     arcpy.SelectLayerByAttribute_management(lyr, "NEW_SELECTION", selStmt)
     #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
-    outname = outPath + "\\" + site + ".tif"
+    outname = OUT_PATH + "\\" + site + ".tif"
     extent = lyr.getSelectedExtent()
     ENV.extent = str(extent.XMin) + " " + str(extent.YMin) + " " + str(extent.XMax) + " " + str(extent.YMax)
     print "clipping " + site
-    outExtractByMask = SA.ExtractByMask(inRas, lyr)
+    outExtractByMask = SA.ExtractByMask(IN_RAS, lyr)
     outExtractByMask.save(outname)
 
 arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")
@@ -80,38 +80,38 @@ del lyr, selStmt
 #%%
 # complete Pit Remove for each disk
 
-inPath = baseOutPath + "/disks_1_DEM"
-outPath = baseOutPath + "/disks_2_pitsRemoved"
+IN_PATH = BASE_OUT_PATH + "/disks_1_DEM"
+OUT_PATH = BASE_OUT_PATH + "/disks_2_pitsRemoved"
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
 for ras in RasList:
     lyrName = ras[:-4]
-    outRas = outPath + "/" + lyrName + "_pr.tif"
+    outRas = OUT_PATH + "/" + lyrName + "_pr.tif"
     arcpy.PitRemove_TauDEM(ras, "", "", 8, outRas)
 
 #%%
 # calculate flow direction (infinity) and slope for each disk
 
-inPath = baseOutPath + "/disks_2_pitsRemoved"
-outPath = baseOutPath + "/disks_3_flowdir"
-outPath2 = baseOutPath + "/disks_3b_slope"
+IN_PATH = BASE_OUT_PATH + "/disks_2_pitsRemoved"
+OUT_PATH = BASE_OUT_PATH + "/disks_3_flowdir"
+OUT_PATH2 = BASE_OUT_PATH + "/disks_3b_slope"
 
-ENV.workspace = inPath
+ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
 
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
-if not os.path.exists(outPath2):
-    os.makedirs(outPath2)
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
+if not os.path.exists(OUT_PATH2):
+    os.makedirs(OUT_PATH2)
 
 for ras in RasList:
     lyrName = ras[:-7]
-    outRas = outPath + "/" + lyrName + "_fd.tif"
-    outRas2 = outPath2 + "/" + lyrName + "_sl.tif"
-    arcpy.DinfFlowDir_TauDEM(ras, 8, outRas, outRas2)
+    OUT_RAS = OUT_PATH + "/" + lyrName + "_fd.tif"
+    OUT_RAS2 = OUT_PATH2 + "/" + lyrName + "_sl.tif"
+    arcpy.DinfFlowDir_TauDEM(ras, 8, OUT_RAS, OUT_RAS2)
 
