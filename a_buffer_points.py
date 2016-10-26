@@ -21,21 +21,19 @@ from arcpy import env as ENV
 
 ENV.workspace = "D:/EPA_AdjArea/CalcAdjArea/output/_wrkspace"
 ENV.overwriteOutput = True
-arcpy.CheckOutExtension("Spatial")
-arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
-
-baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
+#arcpy.CheckOutExtension("Spatial")
+#arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauDEM")
 
 #%%
 # start with the sample points, buffer them
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-pointLayer = "SitePoints_2.shp"
-inPoints = pointLoc + "/" + pointLayer
+POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
+POINT_LAYER = "SitePoints_2.shp"
+IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
-buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km.shp"
-buffDist = "1500"
+BUFFERED_PTS = POINT_LOC + "/" + "SitePtsBuff1pt5km.shp"
+BUFF_DIST = "1500"
 # do the buffer, don't merge the resulting polys
-arcpy.Buffer_analysis(inPoints, buffedPts, buffDist, "FULL", "ROUND", "NONE")
+arcpy.Buffer_analysis(IN_POINTS, BUFFERED_PTS, BUFF_DIST, "FULL", "ROUND", "NONE")
 
 #%%
 
