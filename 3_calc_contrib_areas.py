@@ -30,7 +30,7 @@ arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauD
 baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
-# get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
+# get a list of siteIDs for all records; make sure they are unique
 pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
 pointLayer = "SitePoints_2.shp"
 inPoints = pointLoc + "/" + pointLayer
@@ -51,16 +51,9 @@ else:
 del cursor, row
     
 #%%
-# calculate contributing area for each disk and point
-inPath = baseOutPath + "/disks_3_flowdir"
-outPath = baseOutPath + "/disks_4b_contribArea"
+# split points into separate shapefiles as tauDEM can't seem to use selections
 outShp = baseOutPath + "/disks_4a_pointShps"
 
-ENV.workspace = inPath
-RasList = arcpy.ListRasters("*","TIF")
-
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
 if not os.path.exists(outShp):
     os.makedirs(outShp)
 
@@ -74,10 +67,17 @@ for site in idList:
     arcpy.CopyFeatures_management("lyr2", outFileN)
 
 arcpy.SelectLayerByAttribute_management("lyr2","CLEAR_SELECTION")
-#outS = site + "_pt.shp"
-#outS = outS.replace("-","_")
-#arcpy.FeatureClassToFeatureClass_conversion(inPoints, outShp, outS, selStmt)
-    
+
+#%%   
+# calculate contributing area for each disk and point
+inPath = baseOutPath + "/disks_3_flowdir"
+outPath = baseOutPath + "/disks_4b_contribArea"
+
+if not os.path.exists(outPath):
+    os.makedirs(outPath)
+
+ENV.workspace = inPath
+RasList = arcpy.ListRasters("*","TIF")
     
 ENV.workspace = outShp
 shpList = arcpy.ListFeatureClasses()    
