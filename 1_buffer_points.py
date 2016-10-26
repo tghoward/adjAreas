@@ -30,26 +30,30 @@ baseOutPath = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
 # start with the sample points, buffer them
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/NYW14_testPts.gdb"
-pointLayer = "SitePoints"
+pointLoc = "D:/EPA_AdjArea/CalcAdjArea/inputs"
+pointLayer = "SitePoints.shp"
 inPoints = pointLoc + "/" + pointLayer
 
-buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km"
+buffedPts = pointLoc + "/" + "SitePtsBuff1pt5km.shp"
 buffDist = "1500"
 # do the buffer, don't merge the resulting polys
 arcpy.Buffer_analysis(inPoints, buffedPts, buffDist, "FULL","ROUND","NONE")
+
+
+#SPLIT INTO TWO, RIGHT HERE, TO AVOID PROBLEM OF BUFFER ANALYSIS MUCKING UP THE POINTS LAYER!!
+# SPENT AN ENTIRE DAY ON THIS AND NARROWED IT DOWN TO THIS CALL. 
 
 #%%
 # get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
 cursor = arcpy.SearchCursor(buffedPts)
 idList = []
 for row in cursor:
-    idval = row.getValue("OBJECTID")
     siteval = row.getValue("site_ID")
-    idList.append((idval,siteval))
+    idList.append(siteval)
 
-siteList = [x[1] for x in idList]
-if len(siteList) > len(set(siteList)):
+#siteList = [x[1] for x in idList]
+#if len(siteList) > len(set(siteList)):
+if len(idList) > len(set(idList)):
     print "site_ID VALUES ARE NOT UNIQUE!!"
 else:
     print "values in site_ID column are unique"
@@ -67,14 +71,15 @@ outPath = baseOutPath + "/disks_1_DEM"
 if not os.path.exists(outPath):
     os.makedirs(outPath)
 
-for tup in idList:
-    selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
+for site in idList:
+    #selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
+    selStmt = "site_ID = '" + site + "'"
     arcpy.SelectLayerByAttribute_management(lyr,"NEW_SELECTION", selStmt)
-    siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
-    outname = outPath + "\\" + siteID + ".tif"
+    #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
+    outname = outPath + "\\" + site + ".tif"
     extent = lyr.getSelectedExtent()
     ENV.extent = str(extent.XMin) + " " + str(extent.YMin) + " " + str(extent.XMax) + " " + str(extent.YMax)
-    print "clipping " + siteID
+    print "clipping " + site
     outExtractByMask = SA.ExtractByMask(inRas, lyr)
     outExtractByMask.save(outname)
 
@@ -134,29 +139,17 @@ if not os.path.exists(outPath):
 if not os.path.exists(outShp):
     os.makedirs(outShp)
 
-cursor = arcpy.SearchCursor(inPoints)
-siteList = []
-for row in cursor:
-    site = row.getValue("site_ID")
-    siteList.append(site)
-
-#lyr = arcpy.mapping.Layer(inPoints)
-
-pointLoc = "D:/EPA_AdjArea/CalcAdjArea/NYW14_testPts.gdb"
-pointLayer = "SitePoints"
-inPoints = pointLoc + "/" + pointLayer
-
-arcpy.MakeFeatureLayer_management(inPoints, "lyr2")
-for tup in idList:
+arcpy.MakeFeatureLayer_management(inPoints, "lyr")
+for site in idList:
     selStmt = "site_ID = '" + site + "'"
-    selStmt = "OBJECTID = " + str(tup[0])
-    site = tup[1]
-    arcpy.SelectLayerByAttribute_management("lyr2","NEW_SELECTION", selStmt)
+    arcpy.SelectLayerByAttribute_management("lyr","NEW_SELECTION", selStmt)
     outFileN = outShp + "/" + site + "_pt.shp"
     outFileN = outFileN.replace("-","_") #illegal character in shapefile name
-    arcpy.CopyFeatures_management("lyr2", outFileN)
-
+    arcpy.CopyFeatures_management("lyr", outFileN)
     
+#outS = site + "_pt.shp"
+#outS = outS.replace("-","_")
+#arcpy.FeatureClassToFeatureClass_conversion(inPoints, outShp, outS, selStmt)
     
     
 ENV.workspace = outShp
@@ -175,9 +168,9 @@ for shp in shpList:
             arcpy.AreaDinf_TauDEM(flowDirGrid, inShp, "", "false", 8, outContribArea)
  
 
-del lyr, cursor, row     
+del cursor, row   
             
 #%%
     
-arcpy.GetCount_management('lyr2')
+arcpy.GetCount_management('lyr')
     
