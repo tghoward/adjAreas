@@ -60,9 +60,6 @@ for ras in RasList:
 # to clip these polys down to size, we first need to make another set of
 # circles to use as clippers
 
-    # expand the reach of each point.
-# buffer the points by 50 m
-
 IN_PATH = BASE_OUT_PATH + "/e_pts_pointShps"
 OUT_PATH = BASE_OUT_PATH + "/l_pts_buff_pols540"
 
