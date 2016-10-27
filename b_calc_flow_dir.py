@@ -68,7 +68,11 @@ for site in idList:
     #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
     outname = OUT_PATH + "\\" + site + ".tif"
     extent = lyr.getSelectedExtent()
-    ENV.extent = str(extent.XMin) + " " + str(extent.YMin) + " " + str(extent.XMax) + " " + str(extent.YMax)
+    XMIN = str(extent.XMin)
+    YMIN = str(extent.YMin)
+    XMAX = str(extent.XMax)
+    YMAX = str(extent.YMax)
+    ENV.extent = XMIN + " " + YMIN + " " + XMAX + " " + YMAX
     print "clipping " + site
     outExtractByMask = SA.ExtractByMask(IN_RAS, lyr)
     outExtractByMask.save(outname)

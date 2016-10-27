@@ -14,6 +14,8 @@ Assumptions:
     input point layer has a field named "site_ID" and these are unique
 
 If running straight from previous script, restart the kernal with ctrl+. in console.
+
+RESTART THE KERNEL BEFORE RUNNING THIS SCRIPT!!
 """
 
 #%%
@@ -82,7 +84,7 @@ shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
     site = shp[:-7]
-    buffDist = "50"
+    buffDist = "10"
     outShp = OUT_PATH + "/" + site + "_bu.shp"
     arcpy.Buffer_analysis(shp, outShp, buffDist, "FULL", "ROUND", "NONE")
 

@@ -28,15 +28,15 @@ if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
 
 ENV.workspace = IN_PATH
-RasList = arcpy.ListRasters("*", "TIF")    
-    
+RasList = arcpy.ListRasters("*", "TIF")
+
 for ras in RasList:
     lyrName = ras[:-7]
     inRas = IN_PATH + "/" + ras
     outRas = OUT_PATH + "/" + lyrName + "_ci.tif" #contributing area integer
     result = SA.Int((arcpy.Raster(inRas) * 0) + 1)
     result.save(outRas)
-    
+
 #%%
 # now convert to poly
 
@@ -47,17 +47,17 @@ if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
 
 ENV.workspace = IN_PATH
-RasList = arcpy.ListRasters("*", "TIF")    
+RasList = arcpy.ListRasters("*", "TIF")
 
 for ras in RasList:
-    lyrName = ras[:-7].replace("-","_")
+    lyrName = ras[:-7].replace("-", "_")
     inRas = IN_PATH + "/" + ras
     outPol = OUT_PATH + "/" + lyrName + "_ca.shp" #contributing area
     arcpy.RasterToPolygon_conversion(inRas, outPol, "NO_SIMPLIFY", "VALUE")
 
-    
+
 #%%
-# to clip these polys down to size, we first need to make another set of 
+# to clip these polys down to size, we first need to make another set of
 # circles to use as clippers
 
     # expand the reach of each point.
