@@ -46,7 +46,7 @@ for row in cursor:
 if len(idList) > len(set(idList)):
     print "site_ID VALUES ARE NOT UNIQUE!!"
 else:
-    print "values in site_ID column are unique"
+    print "Values in site_ID column are unique"
 
 # check if there are hyphens in idList
 if True in ["-" in x for x in idList]:
@@ -72,7 +72,7 @@ for site in idList:
     #selStmt = "OBJECTID = " + str(tup[0])  #first value of tuple is objectid
     selStmt = "site_ID = '" + site + "'"
     arcpy.SelectLayerByAttribute_management(lyr, "NEW_SELECTION", selStmt)
-    #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique. TODO: test for that
+    #siteID = tup[1]  #second value of tuple is siteid. Needs to be unique.
     outname = OUT_PATH + "\\" + site + ".tif"
     extent = lyr.getSelectedExtent()
     XMIN = str(extent.XMin)
@@ -125,4 +125,3 @@ for ras in RasList:
     OUT_RAS = OUT_PATH + "/" + lyrName + "_fd.tif"
     OUT_RAS2 = OUT_PATH2 + "/" + lyrName + "_sl.tif"
     arcpy.DinfFlowDir_TauDEM(ras, 8, OUT_RAS, OUT_RAS2)
-

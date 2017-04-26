@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "NYW16_pts2.shp"
+POINT_LAYER = "NYW16_pts.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)
@@ -43,8 +43,6 @@ for row in cursor:
     siteval = row.getValue("site_ID")
     idList.append(siteval)
 
-#siteList = [x[1] for x in idList]
-#if len(siteList) > len(set(siteList)):
 if len(idList) > len(set(idList)):
     print "site_ID VALUES ARE NOT UNIQUE!!"
 else:
@@ -65,7 +63,6 @@ for site in idList:
     selStmt = "site_ID = '" + site + "'"
     arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
     outFileN = OUT_SHP + "/" + site + "_pt.shp"
-    outFileN = outFileN.replace("-", "_") #illegal character in shapefile name
     arcpy.CopyFeatures_management("lyr2", outFileN)
 
 arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
@@ -90,33 +87,28 @@ for shp in shpList:
 
 
 #%%
-# use a statewide constant raster (all values of 1)
+# use the original dem disk
 # to make points for each cell within each polygon
 
-#### 4/25/17 need to change the use of the constant raster
-# when trying lidar data because datasets, resolution, etc. 
-# will vary among points. 
-# create a temp constant raster for each loop? based on DEM rasters in a?
-
-IN_CONST_RAS = "D:/EPA_AdjArea/CalcAdjArea/inputs/constantRaster.tif"
 IN_PATH = BASE_OUT_PATH + "/f_pts_buff_pols"
 OUT_PATH = BASE_OUT_PATH + "/g_disks_buffPts"
+RAS_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
-
+    
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
-
-ENV.cellSize = IN_CONST_RAS
-ENV.snapRaster = IN_CONST_RAS
 
 for shp in shpList:
     site = shp[:-7]
     shpFull = IN_PATH + "/" + shp
+    rasFull = RAS_PATH + "/" + site + ".tif"
+    ENV.cellSize = rasFull
+    ENV.snapRaster = rasFull
     ENV.extent = shpFull
     outRas = OUT_PATH + "/" + site + "_bp.tif"
-    arcpy.PolygonToRaster_conversion(shpFull, "FID", outRas, "CELL_CENTER", "", 10)
+    arcpy.PolygonToRaster_conversion(shpFull, "FID", outRas, "CELL_CENTER", "", ENV.cellSize)
 
 arcpy.ClearEnvironment("extent")
 
@@ -151,7 +143,7 @@ ENV.workspace = IN_SHP
 shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
-    site = shp[:-7].replace("_", "-").lower()
+    site = shp[:-7].lower()
     for ras in RasList:
         rname = ras[:-7].lower()
         #print rname

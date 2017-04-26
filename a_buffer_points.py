@@ -32,7 +32,7 @@ ENV.overwriteOutput = True
 #%%
 # start with the sample points, buffer them
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "NYW16_pts2.shp"
+POINT_LAYER = "NYW16_pts.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 BUFFERED_PTS = POINT_LOC + "/" + "NYW16_SitePtsBuff1pt5km.shp"
