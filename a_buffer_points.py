@@ -12,6 +12,7 @@ without merging the resulting polygons (important)
 
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
+    site_ID values MUST NOT have hyphens "-". These are illegal in shapefile names
     
 If running a new set of points and you want to keep earlier runs, move all the folders
 in output/ to a new folder (except _workspace)

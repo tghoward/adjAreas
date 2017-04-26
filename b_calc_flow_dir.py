@@ -48,6 +48,12 @@ if len(idList) > len(set(idList)):
 else:
     print "values in site_ID column are unique"
 
+# check if there are hyphens in idList
+if True in ["-" in x for x in idList]:
+    print "HYPHEN in site names! Remove them before proceeding"
+else:
+    print "No hyphens found; continue"
+    
 del cursor, row
 
 #%%
