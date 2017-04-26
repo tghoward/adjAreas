@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "SitePoints_2.shp"
+POINT_LAYER = "NYW16_pts2.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)
@@ -84,7 +84,7 @@ shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
     site = shp[:-7]
-    buffDist = "10"
+    buffDist = "50"
     outShp = OUT_PATH + "/" + site + "_bu.shp"
     arcpy.Buffer_analysis(shp, outShp, buffDist, "FULL", "ROUND", "NONE")
 
@@ -92,6 +92,11 @@ for shp in shpList:
 #%%
 # use a statewide constant raster (all values of 1)
 # to make points for each cell within each polygon
+
+#### 4/25/17 need to change the use of the constant raster
+# when trying lidar data because datasets, resolution, etc. 
+# will vary among points. 
+# create a temp constant raster for each loop? based on DEM rasters in a?
 
 IN_CONST_RAS = "D:/EPA_AdjArea/CalcAdjArea/inputs/constantRaster.tif"
 IN_PATH = BASE_OUT_PATH + "/f_pts_buff_pols"

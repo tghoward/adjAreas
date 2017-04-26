@@ -91,8 +91,4 @@ for shp in shpList:
     clpShp = CLIP_PATH + "/" + site.upper() + "_bu.shp"
     outShp = OUT_PATH + "/" + site + "_cr.shp" #contributing area restricted
     arcpy.Clip_analysis(inShp, clpShp, outShp)
-
-
-
-
     

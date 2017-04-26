@@ -13,7 +13,7 @@ upland area contributing to that point (or a region around the point)
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
 
-If running straight from previous script, restart the kernal with ctrl+. in console.
+If running straight from previous script, restart the kernal with ctrl+. in console (control period).
 """
 
 #%%
@@ -33,7 +33,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-BUFFERED_PTS = POINT_LOC + "/" + "SitePtsBuff1pt5km.shp"
+BUFFERED_PTS = POINT_LOC + "/" + "NYW16_SitePtsBuff1pt5km.shp"
 
 cursor = arcpy.SearchCursor(BUFFERED_PTS)
 idList = []
@@ -56,6 +56,7 @@ del cursor, row
 lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
 IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
+#IN_RAS = "D:/GIS_data/lidar_dem/MonroeCo_2mMosaic/MonroeMosaic2m.img"
 OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_PATH):
