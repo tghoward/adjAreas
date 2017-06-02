@@ -6,7 +6,7 @@ Created on Fri Oct 21 14:42:24 2016
 
 This script begins with, as inputs:
     sampled wetland points and buffered polygons (see prev script)
-    10 m dem
+    a DEM
 It then extracts an area around each point and, through many steps, estimates the
 upland area contributing to that point (or a region around the point)
 
@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "NYW16_pts.shp"
+POINT_LAYER = "AllWetPts_Buff1pt5km.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)
@@ -52,18 +52,27 @@ del cursor, row
 
 #%%
 # split points into separate shapefiles as tauDEM can't seem to use selections
+# only do points where we have raster disks
+# TODO: just get list from raster disks, don't use it to check
+
 OUT_SHP = BASE_OUT_PATH + "/e_pts_pointShps"
+RAS_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_SHP):
     os.makedirs(OUT_SHP)
 
+ENV.workspace = RAS_PATH
+rasList = arcpy.ListRasters("*", "TIF")  
+
+ENV.workspace = OUT_SHP
 arcpy.MakeFeatureLayer_management(IN_POINTS, "lyr2")
 
 for site in idList:
-    selStmt = "site_ID = '" + site + "'"
-    arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
-    outFileN = OUT_SHP + "/" + site + "_pt.shp"
-    arcpy.CopyFeatures_management("lyr2", outFileN)
+    if site in [ras[:-4] for ras in rasList]:
+        selStmt = "site_ID = '" + site + "'"
+        arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
+        outFileN = OUT_SHP + "/" + site + "_pt.shp"
+        arcpy.CopyFeatures_management("lyr2", outFileN)
 
 arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
 #%%
@@ -96,7 +105,7 @@ RAS_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
-    
+
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 
@@ -146,6 +155,7 @@ for shp in shpList:
     site = shp[:-7].lower()
     for ras in RasList:
         rname = ras[:-7].lower()
+        #rname = ras[:-10].lower()
         #print rname
         if rname == site:
             #print "...match"

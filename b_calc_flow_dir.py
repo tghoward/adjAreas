@@ -5,15 +5,20 @@ Created on Fri Oct 21 14:42:24 2016
 @author: Tim Howard
 
 This script begins with, as inputs:
-    sampled wetland points and buffered polygons (see prev script)
-    10 m dem
+    - sampled wetland points and buffered polygons (see prev script)
+    - 10 m dem or other dem such as from lidar. Use 'mosaic to new raster' tool in 
+      arcgis toolbox to create a single raster from many tiles. 
+    - you can provide a dem that does not cover the full extent of the points. Those
+      locations with no dem under them will be tossed. 
+
 It then extracts an area around each point and, through many steps, estimates the
-upland area contributing to that point (or a region around the point)
+    upland area contributing to that point (or a region around the point)
 
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
 
-If running straight from previous script, restart the kernal with ctrl+. in console (control period).
+If running straight from previous script,
+    restart the kernal with ctrl+. in console (control period).
 """
 
 #%%
@@ -31,9 +36,9 @@ arcpy.ImportToolbox("C:/Program Files/TauDEM/TauDEM5Arc/TauDEM Tools.tbx", "TauD
 BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 
 #%%
-# get a list of ObjectID, siteID tuples for all records, just to be sure for the next step
+# get a list of siteIDs for all records, just to be sure for the next step
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-BUFFERED_PTS = POINT_LOC + "/" + "NYW16_SitePtsBuff1pt5km.shp"
+BUFFERED_PTS = POINT_LOC + "/" + "AllWetPts_Buff1pt5km.shp"
 
 cursor = arcpy.SearchCursor(BUFFERED_PTS)
 idList = []
@@ -53,7 +58,7 @@ if True in ["-" in x for x in idList]:
     print "HYPHEN in site names! Remove them before proceeding"
 else:
     print "No hyphens found; continue"
-    
+
 del cursor, row
 
 #%%
@@ -61,8 +66,10 @@ del cursor, row
 #arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
 lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
-IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
+#IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
 #IN_RAS = "D:/GIS_data/lidar_dem/MonroeCo_2mMosaic/MonroeMosaic2m.img"
+IN_RAS = "D:/GIS_data/lidar_dem/All_2m_mosaic/all_2m_rastersMerged.img"
+
 OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
 if not os.path.exists(OUT_PATH):
@@ -82,15 +89,45 @@ for site in idList:
     ENV.extent = XMIN + " " + YMIN + " " + XMAX + " " + YMAX
     print "clipping " + site
     outExtractByMask = SA.ExtractByMask(IN_RAS, lyr)
-    outExtractByMask.save(outname)
+    # if the result is all no data (e.g. no dem under the poly), don't save
+    # careful: this keeps partial disks
+    if arcpy.GetRasterProperties_management(outExtractByMask, "ALLNODATA").getOutput(0) == '0':
+        print " ... saving " + site
+        outExtractByMask.save(outname)
+    else:
+        print " ... " + site + " dem is all null"
 
 arcpy.SelectLayerByAttribute_management(lyr, "CLEAR_SELECTION")
 
 del lyr, selStmt
+#%%
+# reduce vertical resolution of DEM to remove micro-topography
+# TRIAL!!
+
+######## restart console here #####
+
+#IN_PATH = BASE_OUT_PATH + "/a_disks_DEM"
+#OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM_zSmooth"
+#
+#ENV.workspace = IN_PATH
+#RasList = arcpy.ListRasters("*","TIF")
+#
+#if not os.path.exists(OUT_PATH):
+#    os.makedirs(OUT_PATH)
+#
+#for ras in RasList:
+#    lyrName = ras[:-4]
+#    outRas = OUT_PATH + "/" + lyrName + "_zs.tif" #z-direction smoothed
+#    inras = SA.Raster(ras)
+#    #result = SA.Float(SA.Int(inras * 10))/10
+#    result = SA.Float(SA.Int(inras))
+#    result.save(outRas)
+######## restart console here #####
 
 #%%
 # complete Pit Remove for each disk
 
+#IN_PATH = BASE_OUT_PATH + "/a_disks_DEM_zSmooth"
 IN_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 OUT_PATH = BASE_OUT_PATH + "/b_disks_pitsRemoved"
 
