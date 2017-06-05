@@ -27,6 +27,8 @@ OUT_PATH = BASE_OUT_PATH + "/j_disks_contrib_int"
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
 
+print "cleaning up contrib area raster"    
+    
 ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
 
@@ -46,6 +48,8 @@ OUT_PATH = BASE_OUT_PATH + "/k_pols_contribArea"
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
 
+print "converting to polygon"
+    
 ENV.workspace = IN_PATH
 RasList = arcpy.ListRasters("*", "TIF")
 
@@ -66,6 +70,8 @@ OUT_PATH = BASE_OUT_PATH + "/l_pts_buff_pols540"
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
 
+print "clipping polys down to size"    
+    
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 

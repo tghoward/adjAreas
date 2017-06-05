@@ -68,7 +68,7 @@ lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
 #IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
 #IN_RAS = "D:/GIS_data/lidar_dem/MonroeCo_2mMosaic/MonroeMosaic2m.img"
-IN_RAS = "D:/GIS_data/lidar_dem/All_2m_mosaic/all_2m_rastersMerged.img"
+IN_RAS = "D:/GIS_data/lidar_dem/All_1m_mosaicDS/All_lidar_DEM_Mosaic.gdb/NYS_Lidar_DEM"
 
 OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 
@@ -140,6 +140,7 @@ if not os.path.exists(OUT_PATH):
 for ras in RasList:
     lyrName = ras[:-4]
     outRas = OUT_PATH + "/" + lyrName + "_pr.tif"
+    print "pit removal on " + lyrName
     arcpy.PitRemove_TauDEM(ras, "", "", 8, outRas)
 
 #%%
@@ -161,4 +162,5 @@ for ras in RasList:
     lyrName = ras[:-7]
     OUT_RAS = OUT_PATH + "/" + lyrName + "_fd.tif"
     OUT_RAS2 = OUT_PATH2 + "/" + lyrName + "_sl.tif"
+    print "flow direction on " + lyrName
     arcpy.DinfFlowDir_TauDEM(ras, 8, OUT_RAS, OUT_RAS2)

@@ -79,6 +79,8 @@ arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
 # expand the reach of each point.
 # buffer the points by 50 m
 
+print "buffering points"
+
 IN_PATH = BASE_OUT_PATH + "/e_pts_pointShps"
 OUT_PATH = BASE_OUT_PATH + "/f_pts_buff_pols"
 
@@ -108,6 +110,8 @@ if not os.path.exists(OUT_PATH):
 
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
+
+print "converting raster to point"
 
 for shp in shpList:
     site = shp[:-7]
@@ -141,6 +145,8 @@ for ras in rasList:
 IN_PATH = BASE_OUT_PATH + "/c_disks_flowdir"
 OUT_PATH = BASE_OUT_PATH + "/i_disks_contribArea"
 IN_SHP = BASE_OUT_PATH + "/h_pts_in_buff"
+
+print "calculating contributing area"
 
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)
