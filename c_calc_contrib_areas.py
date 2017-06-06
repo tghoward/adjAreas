@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "AllWetPts_Buff1pt5km.shp"
+POINT_LAYER = "PISP_Buff800m.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)
@@ -111,12 +111,13 @@ if not os.path.exists(OUT_PATH):
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 
-print "converting raster to point"
+print "original buffered poly to raster:"
 
 for shp in shpList:
     site = shp[:-7]
     shpFull = IN_PATH + "/" + shp
     rasFull = RAS_PATH + "/" + site + ".tif"
+    print " ... " + site
     ENV.cellSize = rasFull
     ENV.snapRaster = rasFull
     ENV.extent = shpFull
@@ -134,10 +135,13 @@ if not os.path.exists(OUT_PATH):
 ENV.workspace = IN_PATH
 rasList = arcpy.ListRasters("*", "TIF")
 
+print "this raster now back to point data:"
+
 for ras in rasList:
     site = ras[:-7]
     rasFull = IN_PATH + "/" + ras
     outShp = OUT_PATH + "/" + site + "_bp.shp"
+    print ".. " + site
     arcpy.RasterToPoint_conversion(rasFull, outShp, "VALUE")
 
 #%%
@@ -168,6 +172,7 @@ for shp in shpList:
             flowDirGrid = IN_PATH + "/" + ras
             outContribArea = OUT_PATH + "/" + rname + "_ca.tif"
             inShap = IN_SHP + "/" + shp
+            print ". " + site
             arcpy.AreaDinf_TauDEM(flowDirGrid, inShap, "", "false", 8, outContribArea)
 #%%
 

@@ -55,6 +55,7 @@ RasList = arcpy.ListRasters("*", "TIF")
 
 for ras in RasList:
     lyrName = ras[:-7].replace("-", "_")
+    print " .. " + ras
     inRas = IN_PATH + "/" + ras
     outPol = OUT_PATH + "/" + lyrName + "_ca.shp" #contributing area
     arcpy.RasterToPolygon_conversion(inRas, outPol, "NO_SIMPLIFY", "VALUE")
