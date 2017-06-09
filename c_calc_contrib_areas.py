@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "ALL_GENPTS_CA_BC_MM_SP_AdjArea_7June2017.shp"
+POINT_LAYER = "AllWetPts_April2017_n157_TH.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)
@@ -67,13 +67,13 @@ rasList = arcpy.ListRasters("*", "TIF")
 ENV.workspace = OUT_SHP
 arcpy.MakeFeatureLayer_management(IN_POINTS, "lyr2")
 
-for site in idList:
-    if site in [ras[:-4] for ras in rasList]:
-        selStmt = "site_ID = '" + site + "'"
-        arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
-        outFileN = OUT_SHP + "/" + site + "_pt.shp"
-        arcpy.CopyFeatures_management("lyr2", outFileN)
-
+for siteFN in rasList:
+    site = siteFN[:-4]
+    selStmt = "site_ID = '" + site + "'"
+    arcpy.SelectLayerByAttribute_management("lyr2", "NEW_SELECTION", selStmt)
+    outFileN = OUT_SHP + "/" + site + "_pt.shp"
+    arcpy.CopyFeatures_management("lyr2", outFileN)
+        
 arcpy.SelectLayerByAttribute_management("lyr2", "CLEAR_SELECTION")
 #%%
 # expand the reach of each point.
@@ -111,7 +111,7 @@ if not os.path.exists(OUT_PATH):
 ENV.workspace = IN_PATH
 shpList = arcpy.ListFeatureClasses()
 
-print "original buffered poly to raster:"
+print "small buffered point to raster:"
 
 for shp in shpList:
     site = shp[:-7]
@@ -135,7 +135,7 @@ if not os.path.exists(OUT_PATH):
 ENV.workspace = IN_PATH
 rasList = arcpy.ListRasters("*", "TIF")
 
-print "this raster now back to point data:"
+print "raster cells to points"
 
 for ras in rasList:
     site = ras[:-7]
