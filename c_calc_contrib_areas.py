@@ -34,7 +34,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records; make sure they are unique
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "PISP_Buff800m.shp"
+POINT_LAYER = "ALL_GENPTS_CA_BC_MM_SP_AdjArea_7June2017.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
 cursor = arcpy.SearchCursor(IN_POINTS)

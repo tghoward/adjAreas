@@ -38,7 +38,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records, just to be sure for the next step
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-BUFFERED_PTS = POINT_LOC + "/" + "PISP_Buff800m.shp"
+BUFFERED_PTS = POINT_LOC + "/" + "AdjArea_June2017_Buff1km.shp"
 
 cursor = arcpy.SearchCursor(BUFFERED_PTS)
 idList = []
@@ -66,9 +66,9 @@ del cursor, row
 #arcpy.MakeFeatureLayer_management(buffedPts, "lyr")
 lyr = arcpy.mapping.Layer(BUFFERED_PTS)
 
-#IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
+IN_RAS = "D:/GIS_data/DEM/Masked_NED_Resampled_10m_DEM.tif"
 #IN_RAS = "D:/GIS_data/lidar_dem/MonroeCo_2mMosaic/MonroeMosaic2m.img"
-IN_RAS = "D:/GIS_data/lidar_dem/All_1m_mosaicDS/All_lidar_DEM_Mosaic.gdb/NYS_Lidar_DEM"
+#IN_RAS = "D:/GIS_data/lidar_dem/All_1m_mosaicDS/All_lidar_DEM_Mosaic.gdb/NYS_Lidar_DEM"
 
 OUT_PATH = BASE_OUT_PATH + "/a_disks_DEM"
 

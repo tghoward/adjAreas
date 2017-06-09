@@ -33,11 +33,11 @@ ENV.overwriteOutput = True
 # start with the sample points, buffer them
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
 #POINT_LAYER = "AllWetPts_April2017_n157_TH.shp"
-POINT_LAYER = "PISP_RandomPts.shp"
+POINT_LAYER = "ALL_GENPTS_CA_BC_MM_SP_AdjArea_7June2017.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
-BUFFERED_PTS = POINT_LOC + "/" + "PISP_Buff800m.shp"
-BUFF_DIST = "800"
+BUFFERED_PTS = POINT_LOC + "/" + "AdjArea_June2017_Buff1km.shp"
+BUFF_DIST = "1000"
 # do the buffer, don't merge the resulting polys
 arcpy.Buffer_analysis(IN_POINTS, BUFFERED_PTS, BUFF_DIST, "FULL", "ROUND", "NONE")
 
