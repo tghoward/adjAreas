@@ -38,7 +38,7 @@ BASE_OUT_PATH = "D:/EPA_AdjArea/CalcAdjArea/output"
 #%%
 # get a list of siteIDs for all records, just to be sure for the next step
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-BUFFERED_PTS = POINT_LOC + "/" + "AdjArea_June2017_Buff1km.shp"
+BUFFERED_PTS = POINT_LOC + "/" + "AllWetPts_Buff1km.shp"
 
 cursor = arcpy.SearchCursor(BUFFERED_PTS)
 idList = []

@@ -34,6 +34,7 @@ RasList = arcpy.ListRasters("*", "TIF")
 
 for ras in RasList:
     lyrName = ras[:-7]
+    print lyrName
     inRas = IN_PATH + "/" + ras
     outRas = OUT_PATH + "/" + lyrName + "_ci.tif" #contributing area integer
     result = SA.Int((arcpy.Raster(inRas) * 0) + 1)
@@ -94,6 +95,7 @@ shpList = arcpy.ListFeatureClasses()
 
 for shp in shpList:
     site = shp[:-7]
+    print site
     inShp = IN_PATH + "/" + shp
     clpShp = CLIP_PATH + "/" + site.upper() + "_bu.shp"
     outShp = OUT_PATH + "/" + site + "_cr.shp" #contributing area restricted
