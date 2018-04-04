@@ -105,7 +105,7 @@ for shp in shpList:
 # merge all the polys into one GDB
 
 IN_PATH = BASE_OUT_PATH + "/m_clip_contribArea"
-OUT_PATH = BASE_OUT_PATH + "/N_merge_up"
+OUT_PATH = BASE_OUT_PATH + "/n_merge_up"
 OUT_GDB = "clip_contribArea_FCs.gdb"
 OUT_FC = OUT_PATH + "/" + OUT_GDB + "/contributingAreas"
 
