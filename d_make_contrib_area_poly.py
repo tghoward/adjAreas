@@ -101,3 +101,34 @@ for shp in shpList:
     outShp = OUT_PATH + "/" + site + "_cr.shp" #contributing area restricted
     arcpy.Clip_analysis(inShp, clpShp, outShp)
     
+#%%
+# merge all the polys into one GDB
+
+IN_PATH = BASE_OUT_PATH + "/m_clip_contribArea"
+OUT_PATH = BASE_OUT_PATH + "/N_merge_up"
+OUT_GDB = "clip_contribArea_FCs.gdb"
+OUT_FC = OUT_PATH + "/" + OUT_GDB + "/contributingAreas"
+
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
+    
+print "merge up to a single feature class"
+
+ENV.workspace = IN_PATH
+shpList = arcpy.ListFeatureClasses()
+
+# first add a site_ID field to all of them
+for shp in shpList:
+    site = shp[:-7]
+    arcpy.AddField_management(shp, "site_ID", "TEXT")
+    cur = arcpy.UpdateCursor(shp)
+    print "adding to attribute table for " + shp
+    for row in cur:
+        row.setValue("site_ID", site)
+        cur.updateRow(row)
+
+arcpy.CreateFileGDB_management(OUT_PATH, OUT_GDB)
+
+arcpy.Merge_management(shpList, OUT_FC)
+
+    
