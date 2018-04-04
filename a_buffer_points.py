@@ -13,6 +13,10 @@ without merging the resulting polygons (important)
 Assumptions:
     input point layer has a field named "site_ID" and these are unique
     site_ID values MUST NOT have hyphens "-". These are illegal in shapefile names
+    (you can replace hyphens with underscore using field calculator in Arc, 
+    using the re python library and Python as parser: add "import re" in Codeblock, then 
+    re.sub("-", "_", !theSiteIDFieldWithHyphens!)
+    in main code field.)
 
 If running a new set of points and you want to keep earlier runs, move all the folders
 in output/ to a new folder (except _workspace)
@@ -32,11 +36,11 @@ ENV.overwriteOutput = True
 #%%
 # start with the sample points, buffer them
 POINT_LOC = "D:/EPA_AdjArea/CalcAdjArea/inputs"
-POINT_LAYER = "AllWetPts_April2017_n157_TH.shp"
+POINT_LAYER = "all_points_4April2018.shp"
 #POINT_LAYER = "ALL_GENPTS_CA_BC_MM_SP_AdjArea_7June2017.shp"
 IN_POINTS = POINT_LOC + "/" + POINT_LAYER
 
-BUFFERED_PTS = POINT_LOC + "/" + "AllWetPts_Buff1km.shp"
+BUFFERED_PTS = POINT_LOC + "/" + "AllPts_Buff1km.shp"
 BUFF_DIST = "1000"
 # do the buffer, don't merge the resulting polys
 arcpy.Buffer_analysis(IN_POINTS, BUFFERED_PTS, BUFF_DIST, "FULL", "ROUND", "NONE")
